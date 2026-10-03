@@ -1,0 +1,12 @@
+# Virtual environments & Python bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS & IDE metadata
+.DS_Store
+.vscode/
+.idea/
+_agents/

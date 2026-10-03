@@ -1,0 +1,502 @@
+[
+  {
+    "employee_id": "EMP-1001",
+    "employee_name": "Marcus Thompson",
+    "employee_email": "m.thompson@cme-mfg.com",
+    "anonymous_actor_hash": "usr_37df4fec",
+    "department": "Operations",
+    "role": "Shift Supervisor",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1002",
+    "employee_name": "Elena Rostova",
+    "employee_email": "e.rostova@cme-mfg.com",
+    "anonymous_actor_hash": "usr_8b239fef",
+    "department": "Operations",
+    "role": "Shift Supervisor",
+    "plant_location": "Toledo Assembly Plant",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1003",
+    "employee_name": "David Kowalski",
+    "employee_email": "d.kowalski@cme-mfg.com",
+    "anonymous_actor_hash": "usr_4230c855",
+    "department": "Operations",
+    "role": "Shift Supervisor",
+    "plant_location": "Houston Precision Machining",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1004",
+    "employee_name": "Sarah Jenkins",
+    "employee_email": "s.jenkins@cme-mfg.com",
+    "anonymous_actor_hash": "usr_5c9a1a49",
+    "department": "Operations",
+    "role": "Shift Supervisor",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1005",
+    "employee_name": "Carlos Rivera",
+    "employee_email": "c.rivera@cme-mfg.com",
+    "anonymous_actor_hash": "usr_b18a0215",
+    "department": "Operations",
+    "role": "Shift Supervisor",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1006",
+    "employee_name": "Priya Patel",
+    "employee_email": "p.patel@cme-mfg.com",
+    "anonymous_actor_hash": "usr_a533886b",
+    "department": "Operations",
+    "role": "Shift Supervisor",
+    "plant_location": "Toledo Assembly Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1007",
+    "employee_name": "James Vance",
+    "employee_email": "j.vance@cme-mfg.com",
+    "anonymous_actor_hash": "usr_95f498e2",
+    "department": "Operations",
+    "role": "Shift Supervisor",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1008",
+    "employee_name": "Linda Chen",
+    "employee_email": "l.chen@cme-mfg.com",
+    "anonymous_actor_hash": "usr_6b0d5389",
+    "department": "Operations",
+    "role": "PLC Maintenance Technician",
+    "plant_location": "Cleveland Foundry & Casting",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1009",
+    "employee_name": "Robert Miller",
+    "employee_email": "r.miller@cme-mfg.com",
+    "anonymous_actor_hash": "usr_04db9c5b",
+    "department": "Operations",
+    "role": "PLC Maintenance Technician",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1010",
+    "employee_name": "Angela Davis",
+    "employee_email": "a.davis@cme-mfg.com",
+    "anonymous_actor_hash": "usr_57cd8f53",
+    "department": "Operations",
+    "role": "PLC Maintenance Technician",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1011",
+    "employee_name": "Michael Rodriguez",
+    "employee_email": "m.rodriguez@cme-mfg.com",
+    "anonymous_actor_hash": "usr_53c599ee",
+    "department": "Operations",
+    "role": "PLC Maintenance Technician",
+    "plant_location": "Houston Precision Machining",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1012",
+    "employee_name": "Rachel Martinez",
+    "employee_email": "r.martinez@cme-mfg.com",
+    "anonymous_actor_hash": "usr_fbdf07e8",
+    "department": "Operations",
+    "role": "PLC Maintenance Technician",
+    "plant_location": "Cleveland Foundry & Casting",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1013",
+    "employee_name": "William Hernandez",
+    "employee_email": "w.hernandez@cme-mfg.com",
+    "anonymous_actor_hash": "usr_e6f1aa7a",
+    "department": "Operations",
+    "role": "PLC Maintenance Technician",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1014",
+    "employee_name": "Fatima Lopez",
+    "employee_email": "f.lopez@cme-mfg.com",
+    "anonymous_actor_hash": "usr_a4683ef8",
+    "department": "Operations",
+    "role": "PLC Maintenance Technician",
+    "plant_location": "Toledo Assembly Plant",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1015",
+    "employee_name": "Thomas Gonzalez",
+    "employee_email": "t.gonzalez@cme-mfg.com",
+    "anonymous_actor_hash": "usr_f73486d8",
+    "department": "Operations",
+    "role": "PLC Maintenance Technician",
+    "plant_location": "Houston Precision Machining",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1016",
+    "employee_name": "Hannah Wilson",
+    "employee_email": "h.wilson@cme-mfg.com",
+    "anonymous_actor_hash": "usr_0dfada7c",
+    "department": "Operations",
+    "role": "Materials & Supply Expediter",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1017",
+    "employee_name": "Daniel Anderson",
+    "employee_email": "d.anderson@cme-mfg.com",
+    "anonymous_actor_hash": "usr_ef17a846",
+    "department": "Operations",
+    "role": "Materials & Supply Expediter",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1018",
+    "employee_name": "Sofia Thomas",
+    "employee_email": "s.thomas@cme-mfg.com",
+    "anonymous_actor_hash": "usr_6396358a",
+    "department": "Operations",
+    "role": "Materials & Supply Expediter",
+    "plant_location": "Toledo Assembly Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1019",
+    "employee_name": "Kevin Taylor",
+    "employee_email": "k.taylor@cme-mfg.com",
+    "anonymous_actor_hash": "usr_a0393de6",
+    "department": "Operations",
+    "role": "Materials & Supply Expediter",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1020",
+    "employee_name": "Meghan Moore",
+    "employee_email": "m.moore@cme-mfg.com",
+    "anonymous_actor_hash": "usr_20d5cea7",
+    "department": "Operations",
+    "role": "Materials & Supply Expediter",
+    "plant_location": "Cleveland Foundry & Casting",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1021",
+    "employee_name": "Anthony Jackson",
+    "employee_email": "a.jackson@cme-mfg.com",
+    "anonymous_actor_hash": "usr_909067ee",
+    "department": "Operations",
+    "role": "ISO Quality Engineer",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1022",
+    "employee_name": "Grace Martin",
+    "employee_email": "g.martin@cme-mfg.com",
+    "anonymous_actor_hash": "usr_fec1b34d",
+    "department": "Operations",
+    "role": "ISO Quality Engineer",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1023",
+    "employee_name": "Brian Lee",
+    "employee_email": "b.lee@cme-mfg.com",
+    "anonymous_actor_hash": "usr_530c15cc",
+    "department": "Operations",
+    "role": "ISO Quality Engineer",
+    "plant_location": "Houston Precision Machining",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1024",
+    "employee_name": "Chloe Perez",
+    "employee_email": "c.perez@cme-mfg.com",
+    "anonymous_actor_hash": "usr_8673c2ba",
+    "department": "Operations",
+    "role": "ISO Quality Engineer",
+    "plant_location": "Cleveland Foundry & Casting",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1025",
+    "employee_name": "Jason White",
+    "employee_email": "j.white@cme-mfg.com",
+    "anonymous_actor_hash": "usr_8d866c68",
+    "department": "Operations",
+    "role": "ISO Quality Engineer",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1026",
+    "employee_name": "Natalie Harris",
+    "employee_email": "n.harris@cme-mfg.com",
+    "anonymous_actor_hash": "usr_9e2a2ecf",
+    "department": "Operations",
+    "role": "ISO Quality Engineer",
+    "plant_location": "Toledo Assembly Plant",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1027",
+    "employee_name": "Jeffrey Sanchez",
+    "employee_email": "j.sanchez@cme-mfg.com",
+    "anonymous_actor_hash": "usr_f27a9530",
+    "department": "Finance",
+    "role": "Plant Cost Controller",
+    "plant_location": "Houston Precision Machining",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1028",
+    "employee_name": "Victoria Clark",
+    "employee_email": "v.clark@cme-mfg.com",
+    "anonymous_actor_hash": "usr_082ce733",
+    "department": "Finance",
+    "role": "Plant Cost Controller",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1029",
+    "employee_name": "Ryan Ramirez",
+    "employee_email": "r.ramirez@cme-mfg.com",
+    "anonymous_actor_hash": "usr_5ffa4367",
+    "department": "Finance",
+    "role": "Plant Cost Controller",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1030",
+    "employee_name": "Samantha Lewis",
+    "employee_email": "s.lewis@cme-mfg.com",
+    "anonymous_actor_hash": "usr_8139f9b9",
+    "department": "Finance",
+    "role": "Plant Cost Controller",
+    "plant_location": "Toledo Assembly Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1031",
+    "employee_name": "Gary Robinson",
+    "employee_email": "g.robinson@cme-mfg.com",
+    "anonymous_actor_hash": "usr_65a563b1",
+    "department": "Finance",
+    "role": "Plant Cost Controller",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1032",
+    "employee_name": "Lauren Walker",
+    "employee_email": "l.walker@cme-mfg.com",
+    "anonymous_actor_hash": "usr_f8ef403a",
+    "department": "Finance",
+    "role": "CapEx & Robotics Financial Analyst",
+    "plant_location": "Cleveland Foundry & Casting",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1033",
+    "employee_name": "Nicholas Young",
+    "employee_email": "n.young@cme-mfg.com",
+    "anonymous_actor_hash": "usr_28552282",
+    "department": "Finance",
+    "role": "CapEx & Robotics Financial Analyst",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1034",
+    "employee_name": "Amber Allen",
+    "employee_email": "a.allen@cme-mfg.com",
+    "anonymous_actor_hash": "usr_a01ff485",
+    "department": "Finance",
+    "role": "CapEx & Robotics Financial Analyst",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1035",
+    "employee_name": "Eric King",
+    "employee_email": "e.king@cme-mfg.com",
+    "anonymous_actor_hash": "usr_16a799f8",
+    "department": "Finance",
+    "role": "Direct Procurement Specialist",
+    "plant_location": "Houston Precision Machining",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1036",
+    "employee_name": "Danielle Wright",
+    "employee_email": "d.wright@cme-mfg.com",
+    "anonymous_actor_hash": "usr_143d72e2",
+    "department": "Finance",
+    "role": "Direct Procurement Specialist",
+    "plant_location": "Cleveland Foundry & Casting",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1037",
+    "employee_name": "Stephen Scott",
+    "employee_email": "s.scott@cme-mfg.com",
+    "anonymous_actor_hash": "usr_c79d0e02",
+    "department": "Finance",
+    "role": "Direct Procurement Specialist",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1038",
+    "employee_name": "Kayla Torres",
+    "employee_email": "k.torres@cme-mfg.com",
+    "anonymous_actor_hash": "usr_123ecae0",
+    "department": "Finance",
+    "role": "Direct Procurement Specialist",
+    "plant_location": "Toledo Assembly Plant",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1039",
+    "employee_name": "Larry Nguyen",
+    "employee_email": "l.nguyen@cme-mfg.com",
+    "anonymous_actor_hash": "usr_4fd25ea1",
+    "department": "HR",
+    "role": "HR Onboarding & Staffing Coordinator",
+    "plant_location": "Houston Precision Machining",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1040",
+    "employee_name": "Brianna Hill",
+    "employee_email": "b.hill@cme-mfg.com",
+    "anonymous_actor_hash": "usr_2bb94cc7",
+    "department": "HR",
+    "role": "HR Onboarding & Staffing Coordinator",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1041",
+    "employee_name": "Justin Flores",
+    "employee_email": "j.flores@cme-mfg.com",
+    "anonymous_actor_hash": "usr_9b6b7b04",
+    "department": "HR",
+    "role": "HR Onboarding & Staffing Coordinator",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1042",
+    "employee_name": "Courtney Green",
+    "employee_email": "c.green@cme-mfg.com",
+    "anonymous_actor_hash": "usr_92c22cb4",
+    "department": "HR",
+    "role": "HR Onboarding & Staffing Coordinator",
+    "plant_location": "Toledo Assembly Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1043",
+    "employee_name": "Scott Adams",
+    "employee_email": "s.adams@cme-mfg.com",
+    "anonymous_actor_hash": "usr_89d9632b",
+    "department": "HR",
+    "role": "HR Onboarding & Staffing Coordinator",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1044",
+    "employee_name": "Rebecca Nelson",
+    "employee_email": "r.nelson@cme-mfg.com",
+    "anonymous_actor_hash": "usr_73617351",
+    "department": "HR",
+    "role": "Payroll & Garnishment Specialist",
+    "plant_location": "Cleveland Foundry & Casting",
+    "shift": "Shift 2 (Swing)"
+  },
+  {
+    "employee_id": "EMP-1045",
+    "employee_name": "Brandon Baker",
+    "employee_email": "b.baker@cme-mfg.com",
+    "anonymous_actor_hash": "usr_95d70101",
+    "department": "HR",
+    "role": "Payroll & Garnishment Specialist",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1046",
+    "employee_name": "Tiffany Hall",
+    "employee_email": "t.hall@cme-mfg.com",
+    "anonymous_actor_hash": "usr_7da87350",
+    "department": "HR",
+    "role": "Payroll & Garnishment Specialist",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 1 (Day)"
+  },
+  {
+    "employee_id": "EMP-1047",
+    "employee_name": "Benjamin Campbell",
+    "employee_email": "b.campbell@cme-mfg.com",
+    "anonymous_actor_hash": "usr_e4fa0a4b",
+    "department": "HR",
+    "role": "Payroll & Garnishment Specialist",
+    "plant_location": "Houston Precision Machining",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1048",
+    "employee_name": "Allison Mitchell",
+    "employee_email": "a.mitchell@cme-mfg.com",
+    "anonymous_actor_hash": "usr_64f0f633",
+    "department": "HR",
+    "role": "HR Workers' Comp & Safety Case Manager",
+    "plant_location": "Cleveland Foundry & Casting",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1049",
+    "employee_name": "Samuel Carter",
+    "employee_email": "s.carter@cme-mfg.com",
+    "anonymous_actor_hash": "usr_345577a4",
+    "department": "HR",
+    "role": "HR Workers' Comp & Safety Case Manager",
+    "plant_location": "Detroit Stamping Plant",
+    "shift": "Shift 3 (Night)"
+  },
+  {
+    "employee_id": "EMP-1050",
+    "employee_name": "Vanessa Roberts",
+    "employee_email": "v.roberts@cme-mfg.com",
+    "anonymous_actor_hash": "usr_72d3bb0e",
+    "department": "HR",
+    "role": "HR Workers' Comp & Safety Case Manager",
+    "plant_location": "Toledo Assembly Plant",
+    "shift": "Shift 2 (Swing)"
+  }
+]
