@@ -65,13 +65,13 @@ Provisioned via [`scripts/setup_dlp_templates.py`](./scripts/setup_dlp_templates
   * Replaces `PERSON_NAME`, `EMAIL_ADDRESS`, `DATE_OF_BIRTH`, and `US_BANK_ROUTING_MICR` with `[INFO_TYPE]` tags.
   * Flags `MEDICAL_TERM` in DLP metadata (`contains_medical_phi = TRUE`, triggering `CRITICAL` `is_toxic_combination` alerts when paired with an SSN) while keeping the clinical injury term readable in text so safety analysts can correlate injuries with equipment faults without knowing *who* was injured.
 
-### 4.2 Post-DLP LLM Judge (`gemini-3.8-flash` on Vertex AI)
-Strictly **after** Cloud DLP de-identifies the record, [`cloud_function/main.py`](./cloud_function/main.py) calls **`gemini-3.8-flash`** (`temperature=0.0`, Structured Outputs via Pydantic `LLMJudgeClassification`) on `prompt_text_masked` to populate:
+### 4.2 Post-DLP LLM Judge & Prompt Coach (`gemini-3.8-flash` on Vertex AI)
+Strictly **after** Cloud DLP de-identifies the record, [`cloud_function/main.py`](./cloud_function/main.py) calls **`gemini-3.8-flash`** (`temperature=0.0`, Structured Outputs via Pydantic `LLMJudgeClassification`) on `prompt_text_masked` to populate **5 Facets**:
 1. **Facet 1 — `functional_intent`:** `'generation_drafting'`, `'transformation_summary'`, `'code_scripting'`, `'info_seeking_qa'`, `'data_extraction'`, or `'analytical_reasoning'`.
 2. **Facet 2 — `task_complexity`:** `'low'` (`5 min` baseline), `'medium'` (`15 min` baseline), or `'high'` (`45 min` baseline).
 3. **Facet 3 — `specification_maturity` (`STRUCT`):** `level_1_underspecified` (`0.5x`), `level_2_basic_directive` (`0.75x`), or `level_3_well_engineered` (`1.0x`), plus `has_persona`, `has_explicit_format`, `has_constraints`, and `is_search_query_style`.
 4. **Facet 4 — `grounding_analysis` (`STRUCT`) & `is_retrieval_gap` (`BOOL`):** Identifies `enterprise_rag` vs. `in_context_attachment` vs. `parametric_general`, `requires_enterprise_knowledge`, `target_corpus`, and flags `is_retrieval_gap = TRUE` whenever an employee asks a CME-specific question without RAG grounding.
-5. **Quality-Adjusted Productivity ROI:** Computes `adjusted_minutes_saved = estimated_manual_minutes * maturity_multiplier`.
+5. **Facet 5 — `prompt_coaching` (`STRUCT`) & `potential_extra_minutes_unlocked` (`FLOAT64`):** Identifies `missing_elements`, writes a 1–2 sentence `improvement_recommendation`, generates a ready-to-use `rewritten_level_3_prompt`, recommends the best CME agent or connector (`recommended_target_agent_or_connector`), and calculates `potential_extra_minutes_unlocked = estimated_manual_minutes * (1.0 - maturity_multiplier)`.
 
 ---
 

@@ -14,9 +14,14 @@ Pipeline Stages in-flight before streaming to BigQuery:
      * `employee_name`  -> Redacted completely via Cloud DLP `RedactConfig`
      * `employee_email` -> Deterministically hashed via Cloud DLP `CryptoHashConfig` (`anonymous_actor_hash`)
      * `prompt_text`    -> Masked/Redacted via Cloud DLP `InfoTypeTransformations` (`prompt_text_masked`)
-2. Stage 2 — Post-DLP LLM Judge (`gemini-3.8-flash` on Vertex AI):
+2. Stage 2 — Post-DLP LLM Judge & Prompt Coach (`gemini-3.8-flash` on Vertex AI):
    Evaluates ONLY the DLP-sanitized `prompt_text_masked` (never raw PII) against the
-   4-Facet Multi-Dimensional Prompt Classification & ROI Framework using Structured Outputs.
+   5-Facet Multi-Dimensional Prompt Classification, ROI & Coaching Framework using Structured Outputs:
+     * Facet 1: Functional Intent (`functional_intent`)
+     * Facet 2: Task Complexity (`task_complexity`, `estimated_manual_minutes`)
+     * Facet 3: Specification Maturity (`specification_maturity`, `maturity_multiplier`, `adjusted_minutes_saved`)
+     * Facet 4: Grounding & RAG Dependency (`grounding_analysis`, `is_retrieval_gap`)
+     * Facet 5: Actionable Prompt Coaching & Level 3 Rewrite (`prompt_coaching`, `potential_extra_minutes_unlocked`)
 3. Stage 3 — BigQuery Streaming Insert:
    Streams the anonymized + LLM-Judge-enriched telemetry row to `cme_ge_analytics.prompt_logs`.
 """
@@ -52,10 +57,11 @@ MATURITY_MULTIPLIERS = {
     "level_3_well_engineered": 1.0,
 }
 
-LLM_JUDGE_SYSTEM_INSTRUCTION = """You are an Enterprise AI Telemetry Judge for CME Manufacturing.
+LLM_JUDGE_SYSTEM_INSTRUCTION = """You are an Enterprise AI Telemetry Judge and Prompt Engineering Coach for CME Manufacturing.
 You evaluate DLP-sanitized employee prompts (`prompt_text_masked`) submitted to Gemini Enterprise.
-Note that sensitive spans have already been masked by Cloud DLP (e.g., `***-**-7742`, `[PERSON_NAME]`, `[EMAIL_ADDRESS]`).
-Classify the prompt across 4 orthogonal dimensions:
+Note that sensitive spans have already been masked by Cloud DLP (e.g., `***-**-7742`, `******8812`, `[PERSON_NAME]`, `[EMAIL_ADDRESS]`, `[DATE_OF_BIRTH]`).
+
+Classify the prompt and provide actionable coaching across 5 orthogonal facets:
 
 1. FUNCTIONAL INTENT (`functional_intent`):
    - `generation_drafting`: Creating new content, emails, incident narratives, CAPA reports, or SOP drafts.
@@ -82,6 +88,13 @@ Classify the prompt across 4 orthogonal dimensions:
    - `parametric_general`: Relies only on the model's general pre-trained world knowledge with no connector or pasted data.
    - Set `requires_enterprise_knowledge = true` if answering accurately requires CME-specific internal policies, plant telemetry, ERP/HR records, or SOPs.
    - Map `target_corpus` to the closest domain: `hr_policy` (HR/Workday/Union/OSHA/Payroll), `product_docs` (Manufacturing SOPs/Quality/CAPA/Plant Engineering), `sales_collateral` (Finance/Controllership/CapEx/Procurement/Vendor), `it_support` (ServiceNow/IT/Plant Tickets), `codebase` (PLC/SQL/Python), or `unknown`.
+
+5. ACTIONABLE PROMPT COACHING & LEVEL 3 REWRITE (`prompt_coaching`):
+   - Identify `missing_elements` from: `persona_role`, `explicit_output_format`, `scope_constraints`, `enterprise_rag_connector`, `pii_minimization` (include `pii_minimization` whenever masked SSNs `***-**-` or bank accounts `******` appear in the prompt).
+   - Set `needs_improvement = true` if `specification_maturity.level != 'level_3_well_engineered'`, or if `grounding_type == 'parametric_general'` when `requires_enterprise_knowledge == true`, or if `pii_minimization` is needed.
+   - Write a concise 1-2 sentence `improvement_recommendation` explaining specifically how the employee can improve the prompt (including how to reference employee/claim IDs instead of pasting raw SSNs when applicable).
+   - Provide `rewritten_level_3_prompt`: A complete, ready-to-use Gold-Standard Level 3 version of the prompt that incorporates an appropriate CME role/persona, explicit structured output format (e.g., Markdown table or checklist), clear plant/shift/lot constraints, and proper grounding without raw PII.
+   - Set `recommended_target_agent_or_connector` to the most appropriate CME Specialist Agent (`1_Plant_Operations_Shift_Coordinator`, `2_Predictive_Maintenance_PLC_Agent`, `3_Supply_Chain_Expediting_Agent`, `4_ISO_Quality_CAPA_Agent`, `5_Plant_Controllership_Cost_Agent`, `6_CapEx_Automation_ROI_Agent`, `7_Direct_Procurement_Tariff_Agent`, `8_HR_Onboarding_I9_Verification_Agent`, `9_Payroll_Tax_Garnishment_Agent`, `10_Workers_Comp_FMLA_OSHA_Agent`) or CME Enterprise Connector (`SharePoint_Manufacturing_SOPs`, `ServiceNow_Plant_Tickets`, `Jira_Quality_CAPA`, `SAP_ERP_Materials`, `SAP_ERP_Financials`, `Google_Drive_Finance_Q3`, `SAP_ERP_Procurement`, `SharePoint_Vendor_Contracts`, `Workday_HR_Records`, `SharePoint_Union_Contracts`, `Workday_Payroll_Docs`, `Google_Drive_Garnishment_Orders`, `ServiceNow_HR_Case_Mgmt`, `Confluence_Safety_OSHA_Policies`).
 """
 
 
@@ -114,6 +127,32 @@ class GroundingAnalysis(BaseModel):
     ]
 
 
+class PromptCoaching(BaseModel):
+    needs_improvement: bool = Field(
+        description="True if the prompt can be improved in specification maturity, enterprise RAG grounding, or PII minimization."
+    )
+    missing_elements: list[
+        Literal[
+            "persona_role",
+            "explicit_output_format",
+            "scope_constraints",
+            "enterprise_rag_connector",
+            "pii_minimization",
+        ]
+    ] = Field(
+        description="List of prompt engineering or governance elements missing from the original prompt."
+    )
+    improvement_recommendation: str = Field(
+        description="Concise 1-2 sentence actionable coaching recommendation on how to improve the prompt."
+    )
+    rewritten_level_3_prompt: str = Field(
+        description="Complete Gold-Standard Level 3 rewritten version of the prompt adding persona, explicit output format, constraints, and safe enterprise grounding."
+    )
+    recommended_target_agent_or_connector: str = Field(
+        description="Recommended CME Specialist Agent (#1-#10) or Enterprise Connector best suited for this task."
+    )
+
+
 class LLMJudgeClassification(BaseModel):
     functional_intent: Literal[
         "generation_drafting",
@@ -129,6 +168,7 @@ class LLMJudgeClassification(BaseModel):
     estimated_manual_minutes: int = Field(
         description="Estimated manual minutes saved before maturity multiplier (e.g., 5 for low, 15 for medium, 45 for high)."
     )
+    prompt_coaching: PromptCoaching
 
 
 dlp_client = dlp_v2.DlpServiceClient()
@@ -172,16 +212,18 @@ def evaluate_prompt_with_llm_judge(
     interaction_type: str,
     leaf_agent: str,
     connectors_queried: list[str],
+    dlp_info_types: list[str],
 ) -> LLMJudgeClassification:
     """
     Invokes Gemini 3.8 Flash (`gemini-3.8-flash`) strictly AFTER Cloud DLP de-identification
-    to classify the masked prompt across the 4-Facet Enterprise Prompt Analytics Framework.
+    to classify the masked prompt and generate a Level 3 Coaching Rewrite.
     """
     judge_input = (
         f"Department: {department}\n"
         f"Interaction Mode: {interaction_type}\n"
         f"Invoked Agent: {leaf_agent}\n"
         f"Connectors Queried: {', '.join(connectors_queried) if connectors_queried else 'None'}\n"
+        f"DLP InfoTypes Detected & Masked: {', '.join(dlp_info_types) if dlp_info_types else 'None'}\n"
         f"DLP-Masked Prompt Text:\n{masked_prompt}"
     )
 
@@ -289,7 +331,7 @@ def process_prompt_log(cloud_event: CloudEvent) -> None:
         agent_tree_str = " -> ".join(tree_path) if isinstance(tree_path, list) else str(tree_path)
 
     # =========================================================================
-    # STAGE 2: Post-DLP LLM Judge (`gemini-3.8-flash` on `masked_prompt` ONLY)
+    # STAGE 2: Post-DLP LLM Judge & Prompt Coach (`gemini-3.8-flash`)
     # =========================================================================
     department = payload.get("department", "Unknown")
     judge_result = evaluate_prompt_with_llm_judge(
@@ -298,12 +340,16 @@ def process_prompt_log(cloud_event: CloudEvent) -> None:
         interaction_type=interaction_type,
         leaf_agent=leaf_agent,
         connectors_queried=connectors,
+        dlp_info_types=info_types,
     )
 
     maturity_level = judge_result.specification_maturity.level
     maturity_multiplier = MATURITY_MULTIPLIERS.get(maturity_level, 0.75)
     adjusted_minutes_saved = round(
         judge_result.estimated_manual_minutes * maturity_multiplier, 2
+    )
+    potential_extra_minutes_unlocked = round(
+        judge_result.estimated_manual_minutes * (1.0 - maturity_multiplier), 2
     )
     is_retrieval_gap = bool(
         judge_result.grounding_analysis.requires_enterprise_knowledge
@@ -347,7 +393,7 @@ def process_prompt_log(cloud_event: CloudEvent) -> None:
         ),
         "operational_entity": payload.get("operational_entity", ""),
         "topic_cluster": payload.get("topic_cluster", ""),
-        # Post-DLP LLM Judge (`gemini-3.8-flash`) 4-Facet Classification & ROI Columns
+        # Post-DLP LLM Judge (`gemini-3.8-flash`) 5-Facet Classification, ROI & Coaching Columns
         "functional_intent": judge_result.functional_intent,
         "task_complexity": judge_result.task_complexity,
         "specification_maturity": judge_result.specification_maturity.model_dump(),
@@ -356,6 +402,8 @@ def process_prompt_log(cloud_event: CloudEvent) -> None:
         "estimated_manual_minutes": judge_result.estimated_manual_minutes,
         "maturity_multiplier": maturity_multiplier,
         "adjusted_minutes_saved": adjusted_minutes_saved,
+        "potential_extra_minutes_unlocked": potential_extra_minutes_unlocked,
+        "prompt_coaching": judge_result.prompt_coaching.model_dump(),
         "latency_ms": int(payload.get("latency_ms", 0)),
         "prompt_tokens": int(payload.get("prompt_tokens", 0)),
         "response_tokens": int(payload.get("response_tokens", 0)),
@@ -368,7 +416,7 @@ def process_prompt_log(cloud_event: CloudEvent) -> None:
         raise RuntimeError(f"BigQuery insert error: {errors}")
 
     logger.info(
-        "Processed log %s (%s) -> actor=%s dlp_risk=%s intent=%s maturity=%s saved_min=%.2f",
+        "Processed log %s (%s) -> actor=%s dlp_risk=%s intent=%s maturity=%s saved_min=%.2f extra_min=%.2f",
         insert_id,
         interaction_type,
         anonymous_actor_hash,
@@ -376,4 +424,5 @@ def process_prompt_log(cloud_event: CloudEvent) -> None:
         judge_result.functional_intent,
         maturity_level,
         adjusted_minutes_saved,
+        potential_extra_minutes_unlocked,
     )
