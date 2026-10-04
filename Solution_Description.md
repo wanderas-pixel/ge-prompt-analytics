@@ -9,8 +9,8 @@
 3. [Deep Dive: The Two Types of Gemini Enterprise Logs](#3-deep-dive-the-two-types-of-gemini-enterprise-logs)
 4. [Step-by-Step Pipeline Components & Mechanics](#4-step-by-step-pipeline-components--mechanics)
 5. [100% Cloud DLP Record & Prompt De-identification Architecture](#5-100-cloud-dlp-record--prompt-de-identification-architecture)
-6. [Post-DLP LLM Judge (`gemini-3.8-flash`) & 4-Facet ROI Framework](#6-post-dlp-llm-judge-gemini-38-flash--4-facet-roi-framework)
-7. [BigQuery Curated Data Model & Semantic Column Reference (`38 Columns`)](#7-bigquery-curated-data-model--semantic-column-reference-38-columns)
+6. [Post-DLP LLM Judge & Prompt Coach (`gemini-3.8-flash`) & 5-Facet ROI Framework](#6-post-dlp-llm-judge--prompt-coach-gemini-38-flash--5-facet-roi-framework)
+7. [BigQuery Curated Data Model & Semantic Column Reference (`40 Columns`)](#7-bigquery-curated-data-model--semantic-column-reference-40-columns)
 8. [Cross-Pillar Executive Storytelling: "The Line 3 Hydraulic Press Story"](#8-cross-pillar-executive-storytelling-the-line-3-hydraulic-press-story)
 9. [Deployed GCP Resources & Demo Walkthrough Guide](#9-deployed-gcp-resources--demo-walkthrough-guide)
 
@@ -30,8 +30,8 @@ As CME scales Gemini Enterprise across its plants and corporate offices, leaders
 1. **The CISO & Works Council Privacy Mandate (Zero Raw PII/PHI in Analytics):**
    * HR specialists, payroll analysts, and shop-floor supervisors routinely paste highly sensitive data directly into prompts — including **Social Security Numbers (`SSNs`)**, **Bank Account & Routing Numbers**, **Dates of Birth (`DOBs`)**, **Employee Names & Emails**, and **Clinical Medical Injury Descriptions (`PHI`)** from OSHA/Workers' Comp claims.
    * Furthermore, Works Council and employee privacy policies prohibit storing the **submitting employee's name or email** in an analytics warehouse where managers could monitor individual workers by name.
-2. **The CFO, COO & AI Center of Excellence Mandate (Adoption, Maturity, RAG Health & ROI):**
-   * Leadership needs to quantify **net productivity hours saved per Business Unit**, measure **Workforce Prompting Maturity** (identifying who is using Gemini like a 3-word Google search engine vs. writing well-engineered prompts), pinpoint **RAG Retrieval Gaps** (where employees ask internal CME questions without triggering an Enterprise Connector), and uncover **cross-pillar operational root causes** across Operations, Finance, and HR.
+2. **The CFO, COO & AI Center of Excellence Mandate (Adoption, Maturity, RAG Health, Prompt Coaching & ROI):**
+   * Leadership needs to quantify **net productivity hours saved per Business Unit**, measure **Workforce Prompting Maturity** (identifying who is using Gemini like a 3-word Google search engine vs. writing well-engineered prompts), provide **automated Gold-Standard Level 3 Prompt Coaching rewrites**, pinpoint **RAG Retrieval Gaps** (where employees ask internal CME questions without triggering an Enterprise Connector), and uncover **cross-pillar operational root causes** across Operations, Finance, and HR.
 
 ### 1.3 How This Solution Solves Both Mandates
 This solution implements a serverless, event-driven telemetry pipeline on Google Cloud (`Cloud Logging -> Log Router Sink -> Pub/Sub -> 2nd Gen Cloud Run Function -> Cloud DLP + Vertex AI Gemini 3.8 Flash Judge -> BigQuery`):
@@ -39,7 +39,7 @@ This solution implements a serverless, event-driven telemetry pipeline on Google
   * `employee_name` is completely removed via **`RedactConfig`**.
   * `employee_email` is deterministically hashed via **`CryptoHashConfig`** into `anonymous_actor_hash` (`usr_<8hex>`), preserving 1-to-1 longitudinal user analytics (`50 employees -> 50 unique IDs`) without ever exposing who the employee is.
   * `prompt_text` is sanitized via **`InfoTypeTransformations`**, masking SSNs (`***-**-7742`) and bank accounts (`******8812`) and replacing direct identifiers with `[PERSON_NAME]`, `[EMAIL_ADDRESS]`, `[DATE_OF_BIRTH]`, and `[US_BANK_ROUTING_MICR]`, while intentionally preserving `MEDICAL_TERM` text so safety incidents can be correlated with machine faults.
-* **Post-DLP Evaluation via Vertex AI `gemini-3.8-flash` LLM Judge:** Strictly **after** Cloud DLP strips PII, the Cloud Run Function invokes **`gemini-3.8-flash`** using Structured Outputs to classify `prompt_text_masked` across a **4-Facet Prompt Classification & ROI Framework** before streaming the enriched row to BigQuery (`cme_ge_analytics.prompt_logs`).
+* **Post-DLP Evaluation & Coaching via Vertex AI `gemini-3.8-flash` LLM Judge:** Strictly **after** Cloud DLP strips PII, the Cloud Run Function invokes **`gemini-3.8-flash`** using Structured Outputs to classify `prompt_text_masked` and generate Level 3 prompt rewrites across a **5-Facet Prompt Classification, ROI & Coaching Framework** before streaming the enriched row to BigQuery (`cme_ge_analytics.prompt_logs`).
 
 ---
 
@@ -68,15 +68,15 @@ flowchart TD
             Inspect --> DeID
         end
 
-        subgraph Stage2 ["Stage 2: Post-DLP LLM Judge (Vertex AI)"]
-            Judge["🧠 gemini-3.8-flash (location=global, temp=0.0)<br/>Receives ONLY prompt_text_masked (Zero Raw PII)<br/>Outputs Structured JSON (LLMJudgeClassification):<br/>• Facet 1: functional_intent<br/>• Facet 2: task_complexity (5m / 15m / 45m)<br/>• Facet 3: specification_maturity (0.5x / 0.75x / 1.0x)<br/>• Facet 4: grounding_analysis & is_retrieval_gap"]
+        subgraph Stage2 ["Stage 2: Post-DLP LLM Judge & Prompt Coach (Vertex AI)"]
+            Judge["🧠 gemini-3.8-flash (location=global, temp=0.0)<br/>Receives ONLY prompt_text_masked (Zero Raw PII)<br/>Outputs Structured JSON (LLMJudgeClassification):<br/>• Facet 1: functional_intent<br/>• Facet 2: task_complexity (5m / 15m / 45m)<br/>• Facet 3: specification_maturity (0.5x / 0.75x / 1.0x)<br/>• Facet 4: grounding_analysis & is_retrieval_gap<br/>• Facet 5: prompt_coaching & Level 3 rewrite"]
         end
 
         DeID -- "Sanitized prompt_text_masked +<br/>anonymous_actor_hash" --> Judge
     end
 
     subgraph Analytics ["4. BigQuery Storage & Conversational Analytics"]
-        Judge -- "Stage 3: Idempotent Streaming Insert<br/>(row_ids = [insert_id])" --> BQ[("🗄️ BigQuery Partitioned & Clustered Table<br/>cme_ge_analytics.prompt_logs<br/>(38 Enriched Columns)")]
+        Judge -- "Stage 3: Idempotent Streaming Insert<br/>(row_ids = [insert_id])" --> BQ[("🗄️ BigQuery Partitioned & Clustered Table<br/>cme_ge_analytics.prompt_logs<br/>(40 Enriched Columns)")]
         BQ <-->|"Semantic Column Descriptions<br/>+ Natural Language Queries"| Agent["🤖 BigQuery Conversational Analytics Agent<br/>(CFO, CISO, COO & AI CoE Insights)"]
     end
 ```
@@ -327,17 +327,17 @@ Using the `info_types` returned by `dlp.inspect_content()`, the Cloud Run Functi
 
 ---
 
-## 6. Post-DLP LLM Judge (`gemini-3.8-flash`) & 4-Facet ROI Framework
+## 6. Post-DLP LLM Judge & Prompt Coach (`gemini-3.8-flash`) & 5-Facet ROI Framework
 
 ### 6.1 Architectural Placement & Privacy Boundary
-The LLM Judge ([`evaluate_prompt_with_llm_judge()`](file:///Users/wanderas/Documents/gcp/NewProjects/cme-ge-prompt-analytics-demo/cloud_function/main.py#L160-L191)) runs **strictly after** Cloud DLP de-identification:
-* It receives **only** `prompt_text_masked`, `department`, `interaction_type`, `leaf_agent`, and `connectors_queried`.
+The LLM Judge ([`evaluate_prompt_with_llm_judge()`](file:///Users/wanderas/Documents/gcp/NewProjects/cme-ge-prompt-analytics-demo/cloud_function/main.py#L209-L242)) runs **strictly after** Cloud DLP de-identification:
+* It receives **only** `prompt_text_masked`, `department`, `interaction_type`, `leaf_agent`, `connectors_queried`, and `dlp_info_types`.
 * It **never** sees raw employee names, emails, SSNs, or bank account numbers.
 * It calls Vertex AI **`gemini-3.8-flash`** (`VERTEX_LOCATION="global"`, `temperature=0.0`, `response_mime_type="application/json"`, `response_schema=LLMJudgeClassification`) using the official `google-genai` SDK.
 
 ---
 
-### 6.2 The 4-Facet Prompt Classification Taxonomy
+### 6.2 The 5-Facet Prompt Classification & Coaching Taxonomy
 
 ```mermaid
 mindmap
@@ -364,6 +364,12 @@ mindmap
       parametric_general
       requires_enterprise_knowledge (BOOL)
       target_corpus (hr_policy, product_docs, sales_collateral, it_support, codebase, unknown)
+    Facet 5: Prompt Coaching & Level 3 Rewrite
+      needs_improvement (BOOL)
+      missing_elements (ARRAY)
+      improvement_recommendation (STRING)
+      rewritten_level_3_prompt (STRING)
+      recommended_target_agent_or_connector (STRING)
 ```
 
 1. **Facet 1 — Functional Intent (`functional_intent`):**
@@ -486,9 +492,9 @@ Woven across both the **400 Native GE Chat Connector logs** and the **600 Agent 
   * [Log Router (`cme-ge-prompt-sink`)](https://console.cloud.google.com/logs/router?project=genai-demos-391416)
 * **Cloud Pub/Sub Topic:**
   * [Topic (`cme-ge-raw-prompts`)](https://console.cloud.google.com/cloudpubsub/topic/detail/cme-ge-raw-prompts?project=genai-demos-391416)
-* **2nd Gen Cloud Run Function (Cloud DLP + Vertex AI `gemini-3.8-flash` Judge):**
+* **2nd Gen Cloud Run Function (Cloud DLP + Vertex AI `gemini-3.8-flash` Judge & Prompt Coach):**
   * [Function (`cme-dlp-log-processor`)](https://console.cloud.google.com/functions/details/us-central1/cme-dlp-log-processor?project=genai-demos-391416)
-* **BigQuery Curated Table (`38 Columns`):**
+* **BigQuery Curated Table (`40 Columns`):**
   * [Table (`genai-demos-391416.cme_ge_analytics.prompt_logs`)](https://console.cloud.google.com/bigquery?project=genai-demos-391416&ws=!1m5!1m4!4m3!1sgenai-demos-391416!2scme_ge_analytics!3sprompt_logs)
 
 ### 9.2 Recommended 5-Minute Customer Demo Flow
@@ -496,7 +502,7 @@ Woven across both the **400 Native GE Chat Connector logs** and the **600 Agent 
    Open [`ge_chat_connector_logs_400.jsonl`](file:///Users/wanderas/Documents/gcp/NewProjects/cme-ge-prompt-analytics-demo/data/raw_ge_chat_connector_logs/ge_chat_connector_logs_400.jsonl) and [`agent_tree_logs_600.jsonl`](file:///Users/wanderas/Documents/gcp/NewProjects/cme-ge-prompt-analytics-demo/data/raw_agent_tree_logs/agent_tree_logs_600.jsonl) to contrast Native GE Chat Connector searches vs. 10-Agent Tree executions, highlighting the unmasked employee names, emails, and SSNs.
 2. **Show the Saved Cloud DLP Templates (GCP Console):**
    Open `cme-ge-prompt-deidentify-template` in the GCP Console and show how `employee_name` (`RedactConfig`), `employee_email` (`CryptoHashConfig`), and `prompt_text` (`InfoTypeTransformations`) are all handled inside Cloud DLP.
-3. **Show the In-Flight Processor & `gemini-3.8-flash` Judge ([`cloud_function/main.py`](file:///Users/wanderas/Documents/gcp/NewProjects/cme-ge-prompt-analytics-demo/cloud_function/main.py)):**
-   Show how Stage 1 calls Cloud DLP and Stage 2 passes **only** `masked_prompt` to Vertex AI `gemini-3.8-flash` with `response_schema=LLMJudgeClassification`.
+3. **Show the In-Flight Processor & `gemini-3.8-flash` Judge & Prompt Coach ([`cloud_function/main.py`](file:///Users/wanderas/Documents/gcp/NewProjects/cme-ge-prompt-analytics-demo/cloud_function/main.py)):**
+   Show how Stage 1 calls Cloud DLP and Stage 2 passes **only** `masked_prompt` to Vertex AI `gemini-3.8-flash` with `response_schema=LLMJudgeClassification` across all 5 Facets.
 4. **Query BigQuery via Conversational Analytics Agent (BigQuery Studio):**
-   Ask the natural language questions for **Business Unit ROI (`adjusted_minutes_saved`)**, **Workforce Maturity Index (`specification_maturity`)**, **Retrieval Gaps (`is_retrieval_gap`)**, **CISO Toxic Combinations (`is_toxic_combination`)**, and **The Line 3 Hydraulic Press Cross-Pillar Story**.
+   Ask the natural language questions for **Business Unit ROI (`adjusted_minutes_saved` & `potential_extra_minutes_unlocked`)**, **Workforce Maturity Index (`specification_maturity`)**, **Retrieval Gaps (`is_retrieval_gap`)**, **Prompt Coaching & Gold-Standard Level 3 Rewrites (`prompt_coaching`)**, **CISO Toxic Combinations (`is_toxic_combination`)**, and **The Line 3 Hydraulic Press Cross-Pillar Story**.

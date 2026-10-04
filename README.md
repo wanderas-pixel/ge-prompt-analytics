@@ -32,11 +32,11 @@ flowchart TD
 
     subgraph Worker ["3. 2nd Gen Cloud Run Function (cme-dlp-log-processor)"]
         PS -- "Eventarc Pub/Sub Push" --> DLPStage["🛡️ Stage 1: 100% Cloud DLP Record & Text De-ID<br/>Table: [employee_name, employee_email, prompt_text]<br/>• employee_name -> RedactConfig ('')<br/>• employee_email -> CryptoHashConfig (anonymous_actor_hash)<br/>• prompt_text -> InfoTypeTransformations (prompt_text_masked)"]
-        DLPStage -- "ONLY prompt_text_masked<br/>(Zero Raw PII)" --> JudgeStage["🧠 Stage 2: Post-DLP LLM Judge<br/>Vertex AI gemini-3.8-flash (Structured JSON)<br/>• Facet 1: functional_intent<br/>• Facet 2: task_complexity (5m / 15m / 45m)<br/>• Facet 3: specification_maturity (0.5x / 0.75x / 1.0x)<br/>• Facet 4: grounding_analysis & is_retrieval_gap"]
+        DLPStage -- "ONLY prompt_text_masked<br/>(Zero Raw PII)" --> JudgeStage["🧠 Stage 2: Post-DLP LLM Judge & Prompt Coach<br/>Vertex AI gemini-3.8-flash (Structured JSON)<br/>• Facet 1: functional_intent<br/>• Facet 2: task_complexity (5m / 15m / 45m)<br/>• Facet 3: specification_maturity (0.5x / 0.75x / 1.0x)<br/>• Facet 4: grounding_analysis & is_retrieval_gap<br/>• Facet 5: prompt_coaching & Level 3 rewrite"]
     end
 
     subgraph Analytics ["4. Curated BigQuery & Conversational Analytics"]
-        JudgeStage -- "Stage 3: Streaming Insert<br/>(Idempotent insertId)" --> BQ[("🗄️ BigQuery Curated Table<br/>cme_ge_analytics.prompt_logs<br/>(38 Enriched Columns)")]
+        JudgeStage -- "Stage 3: Streaming Insert<br/>(Idempotent insertId)" --> BQ[("🗄️ BigQuery Curated Table<br/>cme_ge_analytics.prompt_logs<br/>(40 Enriched Columns)")]
         BQ <-->|"Column Descriptions + SQL"| GEAgent["🔍 BigQuery Conversational Analytics Agent<br/>(CFO, CISO, COO & AI CoE Insights)"]
     end
 ```
@@ -90,7 +90,7 @@ ge-prompt-analytics/
 │   ├── raw_agent_tree_logs/
 │   │   └── agent_tree_logs_600.jsonl                           # 600 raw logs: Vertex AI Agent Engine 10-Agent Tree
 │   └── curated_bigquery_post_dlp/
-│       └── cme_bigquery_masked_1000.jsonl                      # 1,000 post-DLP preview records
+│       └── cme_bigquery_masked_1000.jsonl                      # 1,000 post-DLP & LLM-Judge-coached BigQuery records (40 columns)
 ├── scripts/
 │   ├── generate_synthetic_logs.py                              # Generates the 50-employee roster and 400 + 600 log files
 │   ├── setup_dlp_templates.py                                  # Provisions & tests the 2 saved Cloud DLP Templates in GCP
@@ -99,7 +99,7 @@ ge-prompt-analytics/
 │   ├── main.py                                                 # 2nd Gen Cloud Run Function (Cloud DLP Table + Gemini 3.8 Flash Judge + BQ)
 │   └── requirements.txt                                        # Python dependencies for the Cloud Run Function
 └── bigquery/
-    └── schema_and_queries.sql                                  # BigQuery 38-column DDL + 5 Executive, ROI, RAG & CISO SQL queries
+    └── schema_and_queries.sql                                  # BigQuery 40-column DDL + 6 Executive, ROI, RAG, Coaching & CISO SQL queries
 ```
 
 ---
@@ -124,7 +124,7 @@ python3 -m venv .venv
 # 3. Create & test the saved Cloud DLP Templates (Inspect + 3-Column Record De-identify)
 .venv/bin/python scripts/setup_dlp_templates.py --project "$PROJECT_ID" --test
 
-# 4. Create the BigQuery Dataset & 38-Column Table (cme_ge_analytics.prompt_logs)
+# 4. Create the BigQuery Dataset & 40-Column Table (cme_ge_analytics.prompt_logs)
 bq --project_id="$PROJECT_ID" query --use_legacy_sql=false < bigquery/schema_and_queries.sql
 
 # 5. Create Pub/Sub Topic, Deploy 2nd Gen Cloud Run Function, and Configure Log Router Sink
@@ -159,9 +159,9 @@ gcloud pubsub topics add-iam-policy-binding cme-ge-raw-prompts \
 
 ## 7. Documentation & Deep-Dive References
 
-* **[`Solution_Description.md`](./Solution_Description.md):** Full technical reference covering the two Gemini Enterprise log types, the 10-Agent Tree topology, the 3-column Cloud DLP Record Transformation rules, the 4-Facet `gemini-3.8-flash` LLM Judge taxonomy, the 38-column BigQuery semantic dictionary, and **"The Line 3 Hydraulic Press Story"**.
+* **[`Solution_Description.md`](./Solution_Description.md):** Full technical reference covering the two Gemini Enterprise log types, the 10-Agent Tree topology, the 3-column Cloud DLP Record Transformation rules, the 5-Facet `gemini-3.8-flash` LLM Judge & Prompt Coach taxonomy, the 40-column BigQuery semantic dictionary, and **"The Line 3 Hydraulic Press Story"**.
 * **[`implementation.md`](./implementation.md):** Detailed step-by-step GCP implementation guide and customer "Show & Tell" demo flow.
-* **[`bigquery/schema_and_queries.sql`](./bigquery/schema_and_queries.sql):** BigQuery table DDL and 5 ready-to-run analytical SQL queries for Workforce Maturity, Retrieval Gaps, Business Unit ROI, CISO DLP Governance, and Cross-Pillar Root-Cause Correlation.
+* **[`bigquery/schema_and_queries.sql`](./bigquery/schema_and_queries.sql):** BigQuery table DDL and 6 ready-to-run analytical SQL queries for Workforce Maturity, Retrieval Gaps, Business Unit ROI, CISO DLP Governance, Cross-Pillar Root-Cause Correlation, and Prompt Coaching & Level 3 Rewrites.
 
 ---
 
